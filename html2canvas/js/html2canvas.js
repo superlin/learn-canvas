@@ -18,6 +18,7 @@ window.onload = function () {
       data =
         '<svg xmlns="http://www.w3.org/2000/svg" width="' + rect.width + '" height="' + rect.height + '">' +
           '<foreignObject width="100%" height="100%">' +
+            // se.serializeToString(document.getElementById('holder')) +
             se.serializeToString(document.documentElement) +
           '</foreignObject>' +
         '</svg>',
@@ -30,6 +31,9 @@ window.onload = function () {
       // draw svg into canvas
       ctx.drawImage(img, 0, 0);
       DOMURL.revokeObjectURL(url);
+    };
+    img.onerror = function () {
+      alert('error');
     };
     img.src = url;
 
