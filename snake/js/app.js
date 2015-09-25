@@ -5,12 +5,16 @@ var context = canvas.getContext("2d");
 
 // game
 var game = {
-
+  // 得分
   score: 0,
+  // 帧数
   fps: 8,
+  // 游戏是否已经结束
   over: false,
+  // 提示消息
   message: null,
 
+  // 开始游戏
   start: function () {
     game.over = false;
     game.message = null;
@@ -20,11 +24,13 @@ var game = {
     food.set();
   },
 
+  // 结束游戏
   stop: function () {
     game.over = true;
     game.message = 'GAME OVER - PRESS SPACE';
   },
 
+  // 绘制小方块（snake food）
   drawBox: function (x, y, size, color) {
     context.fillStyle = color;
     context.beginPath();
@@ -36,6 +42,7 @@ var game = {
     context.fill();
   },
 
+  // 画布中绘制分数
   drawScore: function () {
     context.fillStyle = '#999';
     context.font = (canvas.height) + 'px Impact, sans-serif';
@@ -43,6 +50,7 @@ var game = {
     context.fillText(game.score, canvas.width / 2, canvas.height * 0.9);
   },
 
+  // 输出提示信息
   drawMessage: function () {
     if (game.message !== null) {
       context.fillStyle = '#00F';
@@ -54,6 +62,7 @@ var game = {
     }
   },
 
+  // 重置画布
   resetCanvas: function () {
     context.clearRect(0, 0, canvas.width, canvas.height);
   }
@@ -62,14 +71,19 @@ var game = {
 
 // snake
 var snake = {
-
+  // snake的单位大小
   size: canvas.width / 40,
+  // 头部节点的位置
   x: null,
   y: null,
+  // 小块颜色
   color: '#0F0',
+  // 运动方向
   direction: 'left',
+  // snake的组成小块
   sections: [],
 
+  // 初始化
   init: function () {
     snake.sections = [];
     snake.direction = 'left';
@@ -80,6 +94,7 @@ var snake = {
     }
   },
 
+  // 移动snake
   move: function () {
     switch (snake.direction) {
     case 'up':
@@ -100,23 +115,28 @@ var snake = {
     snake.sections.push(snake.x + ',' + snake.y);
   },
 
+  // 绘制snake当前的状态
   draw: function () {
     for (var i = 0; i < snake.sections.length; i++) {
       snake.drawSection(snake.sections[i].split(','));
     }
   },
 
+  // 绘制snake的组成小块
   drawSection: function (section) {
     game.drawBox(parseInt(section[0]), parseInt(section[1]), snake.size, snake.color);
   },
 
+  // 检测冲突
   checkCollision: function () {
     if (snake.isCollision(snake.x, snake.y) === true) {
       game.stop();
     }
   },
 
+  // 是否冲突
   isCollision: function (x, y) {
+    // 越界或者撞上自己
     if (x < snake.size / 2 ||
       x > canvas.width ||
       y < snake.size / 2 ||
@@ -126,6 +146,7 @@ var snake = {
     }
   },
 
+  // 检查是否吃上food
   checkGrowth: function () {
     if (snake.x == food.x && snake.y == food.y) {
       game.score++;
@@ -142,18 +163,22 @@ var snake = {
 
 // food
 var food = {
-
+  // food的大小（和snake的大小一样）
   size: null,
+  // 位置
   x: null,
   y: null,
+  // 颜色
   color: '#0FF',
 
+  // 找到合适的地方设置food的位置
   set: function () {
     food.size = snake.size;
     food.x = (Math.ceil(Math.random() * 10) * snake.size * 4) - snake.size / 2;
     food.y = (Math.ceil(Math.random() * 10) * snake.size * 3) - snake.size / 2;
   },
 
+  // 绘制food
   draw: function () {
     game.drawBox(food.x, food.y, food.size, food.color);
   }
@@ -186,13 +211,20 @@ Object.prototype.getKey = function (value) {
 };
 
 // event listen
+// 保证每一帧只响应一次按键
+var pressed = false;
 addEventListener("keydown", function (e) {
+  if (pressed) {
+    return;
+  }
+
   var lastKey = keys.getKey(e.keyCode);
   if (['up', 'down', 'left', 'right'].indexOf(lastKey) >= 0 && lastKey != inverseDirection[snake.direction]) {
     snake.direction = lastKey;
   } else if (['start_game'].indexOf(lastKey) >= 0 && game.over) {
     game.start();
   }
+  pressed = true;
 }, false);
 
 // game loop
@@ -211,6 +243,7 @@ function loop() {
   }
   setTimeout(function () {
     requestAnimationFrame(loop);
+    pressed = false;
   }, 1000 / game.fps);
 }
 

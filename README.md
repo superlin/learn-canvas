@@ -1,6 +1,7 @@
 # learn-canvas
 
-- [ ] 贪吃蛇（snake）
+- [x] 贪吃蛇（snake）
+  - [x] 连续按键过快会死掉，例如：连续按下和左，而snake还没开始往下运动
 - [ ] 打砖块（breakout）
 - [ ] 雷电（raiden）
 - [x] html2canvas
