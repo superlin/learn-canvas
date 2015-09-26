@@ -159,7 +159,7 @@ var paddle = {
   width: 75,
   height: 10,
   // 挡板颜色
-  color: '#0095DD',
+  color: 'yellow',
 
   // 重置挡板
   reset: function () {
@@ -191,7 +191,7 @@ Brick.height = 20;
 Brick.padding = 10;
 Brick.offsetLeft = 30;
 Brick.offsetTop = 30;
-Brick.color = '#0095DD';
+Brick.color = 'green';
 
 // 绘制砖块
 Brick.prototype.draw = function () {
