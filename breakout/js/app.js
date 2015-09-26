@@ -97,7 +97,7 @@ var game = {
             this.score++;
             if (this.score === this.brickRowCount * this.brickColumnCount) {
               game.over = true;
-              game.message = "You Win!"
+              game.message = 'You Win!';
             }
           }
         }
@@ -143,7 +143,9 @@ var ball = {
   },
   // 球移动位置
   move: function () {
-    if (this.stoped) return;
+    if (this.stoped) {
+      return;
+    }
 
     this.x += this.dx;
     this.y += this.dy;
