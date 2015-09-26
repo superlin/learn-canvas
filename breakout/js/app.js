@@ -24,14 +24,17 @@ var game = {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   },
   start: function () {
-
+    if (game.over) {
+      this.init();
+    }
   },
-  stop: function () {
-
+  showMessage: function () {
+    alert(this.message);
   },
   // 初始化游戏
   init: function () {
     var brickX, brickY;
+    this.clear();
     for (var c = 0; c < this.brickColumnCount; c++) {
       this.bricks[c] = [];
       for (var r = 0; r < this.brickRowCount; r++) {
@@ -40,7 +43,9 @@ var game = {
         this.bricks[c][r] = new Brick(brickX, brickY);
       }
     }
-
+    this.score = 0;
+    this.lives = 3;
+    this.over = false;
     ball.reset();
     paddle.reset();
   },
@@ -75,8 +80,8 @@ var game = {
             b.status = 0;
             this.score++;
             if (this.score === this.brickRowCount * this.brickColumnCount) {
-              alert("YOU WIN, CONGRATS!");
-              document.location.reload();
+              game.over = true;
+              game.message = "You Win!"
             }
           }
         }
@@ -95,13 +100,22 @@ var ball = {
   // 移动速度
   dx: 2,
   dy: -2,
+  // 球是否停止运动
+  stoped: true,
   // 球的颜色
-  color: '#0095DD',
+  color: 'red',
 
   // 重置球
   reset: function () {
     this.x = canvas.width / 2;
-    this.y = canvas.height - 30;
+    this.y = canvas.height - 20;
+    this.dx = 2;
+    this.dy = -2;
+    this.stoped = true;
+  },
+  // 发球
+  start: function () {
+    this.stoped = false;
   },
   // 绘制球
   draw: function () {
@@ -113,6 +127,8 @@ var ball = {
   },
   // 球移动位置
   move: function () {
+    if (this.stoped) return;
+
     this.x += this.dx;
     this.y += this.dy;
   }
@@ -163,7 +179,7 @@ Brick.color = '#0095DD';
 
 // 绘制砖块
 Brick.prototype.draw = function () {
-  if (this.status == 1) {
+  if (this.status === 1) {
     ctx.beginPath();
     ctx.rect(this.x, this.y, Brick.width, Brick.height);
     ctx.fillStyle = Brick.color;
@@ -177,68 +193,77 @@ var rightPressed = false;
 var leftPressed = false;
 addEventListener("keydown", keyDownHandler, false);
 addEventListener("keyup", keyUpHandler, false);
-addEventListener("mousemove", mouseMoveHandler, false);
 
 function keyDownHandler(e) {
-  if (e.keyCode == 39) {
-    rightPressed = true;
-  } else if (e.keyCode == 37) {
-    leftPressed = true;
+  var code = e.keyCode;
+  switch (code) {
+    case 39:
+      rightPressed = true;
+      break;
+    case 37:
+      leftPressed = true;
+      break;
+    case 32:
+      ball.start();
+      break;
+    case 13:
+      game.start();
+      break;
   }
 }
 
 function keyUpHandler(e) {
-  if (e.keyCode == 39) {
+  if (e.keyCode === 39) {
     rightPressed = false;
-  } else if (e.keyCode == 37) {
+  } else if (e.keyCode === 37) {
     leftPressed = false;
-  }
-}
-
-function mouseMoveHandler(e) {
-  var relativeX = e.clientX - canvas.offsetLeft;
-  if (relativeX > 0 && relativeX < canvas.width) {
-    paddle.x = relativeX - paddle.width / 2;
   }
 }
 
 // game loop
 function loop() {
-  game.clear();
-  game.drawBricks();
-  ball.draw();
-  paddle.draw();
-  game.drawScore();
-  game.drawLives();
-  game.checkCollision();
-  if (ball.x + ball.dx > canvas.width - ball.radius || ball.x + ball.dx < ball.radius) {
-    ball.dx = -ball.dx;
-  }
-  if (ball.y + ball.dy < ball.radius) {
-    ball.dy = -ball.dy;
-  } else if (ball.y + ball.dy > canvas.height - ball.radius) {
-    if (ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
+  if (game.over) {
+
+  } else {
+    game.clear();
+    game.drawBricks();
+    ball.draw();
+    paddle.draw();
+    game.drawScore();
+    game.drawLives();
+    game.checkCollision();
+    if (ball.x + ball.dx > canvas.width - ball.radius || ball.x + ball.dx < ball.radius) {
+      ball.dx = -ball.dx;
+    }
+    if (ball.y + ball.dy < ball.radius) {
       ball.dy = -ball.dy;
-    } else {
-      game.lives--;
-      if (!game.lives) {
-        alert("GAME OVER");
-        document.location.reload();
+    } else if (ball.y + ball.dy > canvas.height - ball.radius) {
+      if (ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
+        ball.dy = -ball.dy;
       } else {
-        ball.x = canvas.width / 2;
-        ball.y = canvas.height - 30;
-        ball.dx = 3;
-        ball.dy = -3;
-        paddle.x = (canvas.width - paddle.width) / 2;
+        game.lives--;
+        if (!game.lives) {
+          game.over = true;
+          game.message = "GAME OVER";
+        } else {
+          ball.reset();
+          paddle.reset();
+        }
       }
     }
+    if (rightPressed && paddle.x < canvas.width - paddle.width) {
+      paddle.x += 7;
+      if (ball.stoped) {
+        ball.x += 7;
+      }
+    } else if (leftPressed && paddle.x > 0) {
+      paddle.x -= 7;
+      if (ball.stoped) {
+        ball.x -= 7;
+      }
+    }
+    ball.move();
   }
-  if (rightPressed && paddle.x < canvas.width - paddle.width) {
-    paddle.x += 7;
-  } else if (leftPressed && paddle.x > 0) {
-    paddle.x -= 7;
-  }
-  ball.move();
   requestAnimationFrame(loop);
 }
 
