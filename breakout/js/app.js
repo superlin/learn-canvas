@@ -16,6 +16,8 @@ var game = {
   bricks: [],
   // 游戏是否已结束
   over: false,
+  // 消息
+  message: null,
   // 得分和命数的颜色
   color: '#0095DD',
 
@@ -23,13 +25,27 @@ var game = {
   clear: function () {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   },
+  // 重新开始游戏
   start: function () {
     if (game.over) {
       this.init();
     }
   },
-  showMessage: function () {
-    alert(this.message);
+  // 绘制提示消息
+  drawMessage: function () {
+    var msg;
+    if (game.message) {
+      ctx.save();
+      ctx.fillStyle = '#00F';
+      ctx.strokeStyle = '#FFF';
+      ctx.font = (canvas.height / 10) + 'px Impact';
+      ctx.textAlign = 'center';
+      msg = this.message + ' - PRESS ENTER';
+      ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
+      ctx.strokeText(msg, canvas.width / 2, canvas.height / 2);
+      ctx.restore();
+      game.message = null;
+    }
   },
   // 初始化游戏
   init: function () {
@@ -223,7 +239,7 @@ function keyUpHandler(e) {
 // game loop
 function loop() {
   if (game.over) {
-
+    game.drawMessage();
   } else {
     game.clear();
     game.drawBricks();
